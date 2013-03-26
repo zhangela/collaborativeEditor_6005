@@ -1,0 +1,109 @@
+Testing strategy:
+
+Since the actual delays and lags in server-client communication 
+on local network / even the Internet are extremely unpredictable
+and depend on many different inputs we cannot affect, it is not 
+ideal to use the same interface for testing as we are in the actual 
+implementation. For testing, we decided to circumvent all network
+communication and implement a ServerSimulator that simulates and drives
+all the events that happen when one actually runs the program but in
+a much more organized and controlled manner.
+
+Events are matched to function calls in the following manner:
+UserDQ.createRequest(...) -> simulates a user making a local change in his GUI
+UserDQ.pullRequest() -> simulates request sent from user
+ServerSimulator.receiveRequest() -> simulates request received by server
+UserDQ.pushRequest() -> simulates message from server received by user
+
+In real use, the difference between pullRequest and receiveRequest, 
+for example, is determined by the lag of the network. Here, we can 
+time and order them as we desire to simulate concurrent changes and lagging
+updates. The following test cases have been implemented so far and will
+eventually be transformed into rigorous JUnit tests:
+
+1) simpleInsertion():
+Description: Single user connected to ABCD, inserts X after A
+
+Desired output: User 1: AXBCD
+
+2) concurrentInsertion() 
+Description: 
+Two users connected to ABCD
+U1 inserts X after A, U2 inserts Y after C
+Requests happen at the same time and 
+only get processed afterwards
+
+Desired output:
+Both users: AXBCYD
+
+3) concurrentInsertionInTheSamePlace()
+Description:
+Two users connected to ABCD
+U1 inserts X after A, U2 inserts Y after A
+Requests happen at the same time and 
+only get processed afterwards, request made by
+user 1 gets processed first
+
+Desired output:
+Both users: AYXBCD
+
+4) interleavingInsertions() 
+Description:
+Two users connected to ABCD
+U1 inserts X after A (1), then Y after X (2),
+U2 inserts Z after C (3), then K after Z (4)
+ 
+U1 places both requests 1 and 2, while U2 places 3
+Time t=1: Requests get processed by server in order 1, 3, 2
+Time t=2: U2 receives request 1 from server
+Time t=3: U2 places request 4
+Time t=4: Server processes request 4
+Time t=5: All remaining requests received and processed in order
+
+Ending serverHistory: r1, r3, r2, r4
+
+Desired output:
+Both users: AXYBCZKD
+
+5) singleUserDeletion()
+Description:
+Single user connected to ABCD
+inserts X after B -> ABXCD (INSERT X at 2)
+deletes B through C -> AD (DELETE 1 through 4)
+inserts Y after A -> AYD (INSERT Y at 1)
+gets responses for first 2 events
+inserts Z after Y -> AYZD (INSERT Z at 2)
+get the remaining responses
+
+Desired output:
+User: AYZD
+
+6) tripleUserDeletion() 
+Three users connected to ABCDE
+R1: user 1 deletes BC -> sees ADE (DELETE 1, 3)
+R2: user 2 deletes CD -> sees ABE (DELETE 2, 4)
+R3: user 3 deletes BCD -> sees AE (DELETE 1, 4)
+
+requests get processed in order
+ 
+User views:
+U1: R1->ADE, R2->AE, R3->AE
+U2: R1->AE, R2->AE, R3->AE
+U3: R1->AE, R2->AE, R3->AE
+
+
+The point of the test cases described above is to push
+the concurrency capabilities of the implementation to
+the limits with many changes happening at the same time
+without knowing about other changes made by other users.
+As shown above, the current implementation can handle
+extreme lags when one client only gets the information
+about the document changing when other clients made many
+mutually interfering changes.
+
+
+To test the GUI and the server client communication,
+we will not use a unit testing tool but instead come
+up with a series of use cases that we will try manually
+and write down if our implementation did what we 
+expected from it.

@@ -1,0 +1,35 @@
+Congrats on finishing project 2! Here is how your grade breaks down. The overall average for the project was an 86.7 out of 95. Final grades, including reflections (out of 5 points), are on Stellar.
+
+
+angelaz-mturek-nedmonds
+
+Your group's grade is 94/95.
+
+
+Milestone 1 Checkoff: 9/9
+ - design doc, team contract
+
+Milestone 2 Checkoff: 10/10
+ - gui sketch, demo, code design
+
+Design Overview: 
+design overview & state diagrams 7/7
+protocol 7/7
+message format 6/7
+     As you guys acknowledged, your message format limits the text that can be passed.
+
+Code Design:
+specs 5/5
+testing strategy 5/5
+
+Testing: 5/5
+
+Final Implementation:
+networking 6/6
+GUI 5/5
+realtime responsiveness 4/4
+persistence while server running 5/5
+multiple documents 5/5
+multiple users 5/5
+concurrency 10/10
+     Wow! Great job!
